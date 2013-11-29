@@ -9,7 +9,7 @@ class Toy extends Module {
     val jtagWr = Bool(INPUT)
     val jtagAddr = UInt(INPUT, 8)
     val jtagData = Bits(INPUT, 32)
-    val out = Bits(OUTPUT, 1)
+    val out = Bits(OUTPUT, 32)
     val in = Bits(INPUT, 1)
   }
   val pc = Reg(init=UInt(0,8))
@@ -30,8 +30,8 @@ class Toy extends Module {
   val st = inst(10)
   val jz = inst(9)
   
-  io.out := Bits(1)
-  pc := Mux(ra === Bits(0), pc + rb, pc + UInt(4))
+  io.out := pc
+  pc := Mux(ra === Bits(0), pc + UInt(4), pc + rb)
 
   when (io.jtagWr) { 
     imem(io.jtagAddr) := io.jtagData
@@ -63,10 +63,11 @@ class ToyTest(c: Toy) extends Tester(c, Array(c.io)) {
     def LdImm(rw: Int, imm: Int) = Cat(UInt(rw, 5), UInt(1, 1), UInt(imm, 26))
     val initial = Array(LdImm(0, 8),
 			Op(0, 0, 0, 15),
+			Op(1, 1, 1, 15),
 			Op(0, 0, 0, 9))
     for (x <- 0 until 16) { 
       vars(c.io.in) = Bits(x)
-      vars(c.io.out) = Bits(1)
+      vars(c.io.out) = UInt((x%4) * 4) 
       allGood &&= step(vars)
     }
     allGood
