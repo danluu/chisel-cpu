@@ -58,7 +58,13 @@ class ToyTest(c: Toy) extends Tester(c, Array(c.io)) {
   defTests { 
     var allGood = true
     val vars = new HashMap[Node, Node]()
-    for (x <- 0 until 10) { 
+    def Op(rw: Int, ra: Int, rb: Int, setBit: Int) = 
+      Cat(UInt(rw, 5), UInt(0, 1), UInt(ra, 5), UInt(rb, 5)) | (UInt(1,32) << UInt(setBit))
+    def LdImm(rw: Int, imm: Int) = Cat(UInt(rw, 5), UInt(1, 1), UInt(imm, 26))
+    val initial = Array(LdImm(0, 8),
+			Op(0, 0, 0, 15),
+			Op(0, 0, 0, 9))
+    for (x <- 0 until 16) { 
       vars(c.io.in) = Bits(x)
       vars(c.io.out) = Bits(1)
       allGood &&= step(vars)
