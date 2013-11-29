@@ -32,6 +32,26 @@ class Toy extends Module {
   
   io.out := Bits(1)
   pc := Mux(ra === Bits(0), pc + rb, pc + UInt(4))
+
+  when (io.jtagWr) { 
+    imem(io.jtagAddr) := io.jtagData
+  } .otherwise {
+    when (ldImm) { 
+      rf(rw) := inst(25,0)
+    } .elsewhen (nand === Bits(1)) { 
+      rf(rw) := ~(rf(ra) & rf(rb))
+    } .elsewhen (add === Bits(1)) { 
+      rf(rw) := rf(ra) + rf(rb)
+    } .elsewhen (shl === Bits(1)) { 
+      rf(rw) := rf(ra) << rf(rb)
+    } .elsewhen (shr === Bits(1)) { 
+      rf(rw) := rf(ra) >> rf(rb)
+    } .elsewhen (ld === Bits(1)) { 
+      rf(rw) := imem(rf(ra))
+    } .elsewhen (st === Bits(1)) { 
+      imem(rf(ra)) := rf(rb)
+    }
+  }
 }
 
 class ToyTest(c: Toy) extends Tester(c, Array(c.io)) { 
