@@ -10,6 +10,14 @@ class Toy extends Module {
     val in = Bits(INPUT, 1)
   }
   val pc = Reg(init=UInt(0,8))
+  val imem = Mem(Bits(width = 32), 256)
+  val rf   = Mem(Bits(width = 32), 128)
+  val inst = imem(pc)
+
+  val rw = inst(31, 25)
+  val lc = inst(24) // Treat (23,0) as Immediate constant
+  val ra = inst(23, 17)
+  val rb = inst(16, 10)
   
   io.out := Bits(1)
   pc := pc + UInt(1)
