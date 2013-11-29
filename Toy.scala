@@ -6,6 +6,9 @@ import scala.collection.mutable.HashMap
 
 class Toy extends Module { 
   val io = new Bundle { 
+    val jtagWr = Bool(INPUT)
+    val jtagAddr = UInt(INPUT, 8)
+    val jtagData = Bits(INPUT, 32)
     val out = Bits(OUTPUT, 1)
     val in = Bits(INPUT, 1)
   }
@@ -14,13 +17,21 @@ class Toy extends Module {
   val rf   = Mem(Bits(width = 32), 128)
   val inst = imem(pc)
 
-  val rw = inst(31, 25)
-  val lc = inst(24) // Treat (23,0) as Immediate constant
-  val ra = inst(23, 17)
-  val rb = inst(16, 10)
+  // World's dumbest instruction encoding
+  val rw = inst(31, 27)
+  val ldImm = inst(26) // Treat (25,0) as Immediate constant
+  val ra = inst(25, 21)
+  val rb = inst(20, 16)
+  val nand = inst(15)
+  val add = inst(14)
+  val shl = inst(13)
+  val shr = inst(12)
+  val ld = inst(11)
+  val st = inst(10)
+  val jz = inst(9)
   
   io.out := Bits(1)
-  pc := pc + UInt(1)
+  pc := Mux(ra === Bits(0), pc + rb, pc + UInt(4))
 }
 
 class ToyTest(c: Toy) extends Tester(c, Array(c.io)) { 
