@@ -36,6 +36,7 @@ class Toy extends Module {
   when (io.jtagWr) { 
     imem(io.jtagAddr) := io.jtagData
   } .otherwise {
+    printf("pc %d\n", pc)
     when (ldImm) { 
       rf(rw) := inst(25,0)
     } .elsewhen (nand === Bits(1)) { 
@@ -76,7 +77,7 @@ class ToyTest(c: Toy) extends Tester(c, Array(c.io)) {
 
 object Toy { 
   def main(args: Array[String]): Unit = { 
-    chiselMainTest(Array[String]("--backend", "c", "--genHarness", "--compile", "--test", "--targetDir", "../emulator"),
+    chiselMainTest(Array[String]("--backend", "c", "--genHarness", "--compile", "--test", "--targetDir", "emulator", "--debug"),
 		   () => Module(new Toy())){ c => new ToyTest(c)}
   }
 }
